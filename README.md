@@ -25,6 +25,11 @@ Se creo una clase tag_class que hereda las caracteristicas de la clase xbee pero
 
 Para el caso de las funciones se tiene:
   State_init: que cuando se crea el xbee se actualiza el estado por medio de su ejecución que envpiia 0000 a el receptor para establecer conexión
+  
   state_confirm: cuando el estado del xbee es 2 y llega un numero confirmatorio entonces esta se ejectuta para enviar 9999 al xbee, y retornar al estado 1
+  
   send_data: mientras el xbee no haya sido inicializado correctamente lo hace, si es estado 1 o 2 vuelve a estado 1 y envía la información para actualizar en el display con el nuevo valor
-  dtate_update: dependiendo de la información actualiza el estado. Si el estado es cero y la confirmación del xbee corresponde a la iniciación entonces cambia a estado 1 (que corresponde a inicializado). Si el estado es 1 y el mensaje esta entre 0000 y 9999 entonces significa que el xbee recibio el mensaje que se le envío con la funcion de enviar datos y cambia a estado 2(estado de información alumbrandose), Cuando el estado es 2 y el mensaje esta entre estos mismos intervalos entonces se almacena el valor en la clase y se procede a ejecutar state-confirm para enviar 9999 y resetear el estado a 1.
+  state_update: dependiendo de la información actualiza el estado. 
+    Si el estado es cero y la confirmación del xbee corresponde a la iniciación entonces cambia a estado 1 (que corresponde a inicializado). 
+    Si el estado es 1 y el mensaje esta entre 0000 y 9999 entonces significa que el xbee recibio el mensaje que se le envío con la funcion de enviar datos y cambia a estado 2(estado de información alumbrandose).
+    Cuando el estado es 2 y el mensaje esta entre estos mismos intervalos entonces se almacena el valor en la clase y se procede a ejecutar state-confirm para enviar 9999 y resetear el estado a 1.
