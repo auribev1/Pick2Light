@@ -1,5 +1,7 @@
 
-from digi.xbee.devices import XBeeDevice, RemoteXBeeDevice, XBee64BitAddress
+from digi.xbee.devices import RemoteXBeeDevice, XBee64BitAddress
+import time
+import sys
 
 
 class Tag:
@@ -11,34 +13,50 @@ class Tag:
         self.xbee = RemoteXBeeDevice(master, XBee64BitAddress.from_hex_string(base+str(mac))) # inicializa el xbee
         self.tag_num = tag_num      # crea el numero tag como atributo
         self.value = ""             # define el valor almacenado
-        self.state = self.state_init(master) # Inicializa el xbee para configurarlo por primera vez
+        self.state = 0
 
     def state_init(self, master):
-        master.send_data_async(self.xbee, self.init + self.tag_num) # manda 000 para establecer conexión
-        return 0  # corresponde a elemento enviado
+        for i in range(3):
+            if self.state == 0:
+                master.send_data(self.xbee, self.init + self.tag_num)  # manda 000 para establecer conexión
+            else:
+                return True
+            time.sleep(0.5)
+        sys.exit("Tag: " + self.tag_num + " no ha respondido, verifique su estado antes de continuar")
+        # No funciona por función sincrona, se puede solucionar con un try
 
     def state_confirm(self, master):
-        master.send_data_async(self.xbee, self.confirm + self.tag_num)  #manda 9999 para finalizar comunicación
+        master.send_data(self.xbee, self.confirm + self.tag_num)  # manda 9999 para finalizar comunicación
         self.state = 1
 
     def send_data(self, master, data):
-        if self.state == 1 or self.state == 2:
-            self.state = 1    # En caso de que vuelvan a actualizar la info se regresa a estado 1 esperando confirmacion
-            master.send_data_async(self.xbee, str(data) + self.tag_num)
+        self.state = 1  # En caso de que vuelvan a actualizar la info se regresa a estado 1 esperando confirmacion
+        for i in range(3):
+            if self.state == 1:
+                master.send_data(self.xbee, str(data) + self.tag_num)
+            else:
+                return True
+            time.sleep(0.5)
+        sys.exit("Tag: " + self.tag_num + " no ha respondido")
 
-        elif self.state == 3:   # Si TAG no responde despues de un tiempo pasa a estar inactivo
-            print("tag innactivo - Revisar")
-
-    def state_update(self, info, master):
+    def state_update(self, info, master, conf_bit):
         if self.state == 0:                                 # Si esta en estado de inicialización
             if info == self.init:
                 self.state = 1                              # Estado de inicializado
 
-        elif self.state == 1:                               # Si ya se encuentra inicializado
+        elif (self.state == 1) and (conf_bit == str(0)):    # Si el tag esta en 1 y el bit de confirmación no tiene valor
             if info != self.init and info != self.confirm:  # Y los valores que recibe son entre 0000 y 9999
                 self.state = 2                              # Ubiquese en el estado dos de que ya tiene información alumbrandose
 
-        elif self.state == 2:                               # Si ya se tiene información alumbrandose
+        elif (self.state == 2) and (conf_bit == str(1)):    # Si el tag ya tiene estado 2 y confirmación con bit de confirmación 1
             if info != self.init and info != self.confirm:  # Y los valores que recibe son entre 0000 y 9999
                 self.value = info                           # almacenar el valor enviado
                 self.state_confirm(master)
+                self.post_info()
+
+        elif (self.state == 1) and (conf_bit == str(1)):    # Confirmación con bit de confirmación 1
+            sys.exit("Tag: " + self.tag_num + " probablemente tenga el botón hundido")
+
+
+    def post_info(self):                                    # Función para devolver al servidor
+        print("Tag: ", self.tag_num, " envía el numero: ", self.value)
