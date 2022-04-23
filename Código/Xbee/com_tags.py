@@ -11,7 +11,7 @@ def my_data_received_callback(xbee_message):
     tag_num = data[4:7]
     info = data[:4]
     conf_bit = data[7]      # Bit de confirmación
-    print(tag_num, " ", info)
+    #print(tag_num, " ", info)
     db.loc[(db.tag_num == tag_num) &   # Doble validación si el tag corresponde al numero y si la mac es igual al xbeeadress
            (base + db.mac == str(address))].objects.apply(lambda x: x.state_update(info, master, conf_bit))
 
@@ -34,20 +34,20 @@ for i in range(len(db)):
 while True:
     json = jsongen(1, 10)
     db.loc[db.tag_num == json["num"]].objects.apply(lambda x: x.send_data(master, json["info"]))
-    time.sleep(5)
+    time.sleep(2)
 
 
 # Pruebas
 
-db.objects[0].state
-db.objects[0].send_data(master, "1234")
-db.objects[0].value
+# db.objects[0].state
+# db.objects[0].send_data(master, "1234")
+# db.objects[0].value
 
-for i in range(len(db)):
-    print(db.objects[i].state)
-
-for i in range(len(db)):
-    db.objects[i].send_data(master, "123"+str(i))
-
-for i in range(len(db)):
-    print(db.objects[i].value)
+# for i in range(len(db)):
+#     print(db.objects[i].state)
+#
+# for i in range(len(db)):
+#     db.objects[i].send_data(master, "123"+str(i))
+#
+# for i in range(len(db)):
+#     print(db.objects[i].value)

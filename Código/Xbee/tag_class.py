@@ -16,14 +16,18 @@ class Tag:
         self.state = 0
 
     def state_init(self, master):
-        for i in range(3):
-            if self.state == 0:
-                master.send_data(self.xbee, self.init + self.tag_num)  # manda 000 para establecer conexión
-            else:
-                return True
-            time.sleep(0.5)
-        sys.exit("Tag: " + self.tag_num + " no ha respondido, verifique su estado antes de continuar")
-        # No funciona por función sincrona, se puede solucionar con un try
+        count = 0
+        while count < 3:
+            try:
+                if self.state == 0:
+                    master.send_data(self.xbee, self.init + self.tag_num)  # manda 000 para establecer conexión
+                else:
+                    return True
+            except:
+                count += 1
+
+            time.sleep(0.1)
+        raise Exception("Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar")
 
     def state_confirm(self, master):
         master.send_data(self.xbee, self.confirm + self.tag_num)  # manda 9999 para finalizar comunicación
@@ -31,13 +35,18 @@ class Tag:
 
     def send_data(self, master, data):
         self.state = 1  # En caso de que vuelvan a actualizar la info se regresa a estado 1 esperando confirmacion
-        for i in range(3):
-            if self.state == 1:
-                master.send_data(self.xbee, str(data) + self.tag_num)
-            else:
-                return True
-            time.sleep(0.5)
-        sys.exit("Tag: " + self.tag_num + " no ha respondido")
+        count = 0
+        while count < 3:
+            try:
+                if self.state == 1:
+                    master.send_data(self.xbee, str(data) + self.tag_num)  # manda 000 para establecer conexión
+                else:
+                    return True
+            except:
+                count += 1
+
+            time.sleep(0.1)
+        raise Exception("Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar")
 
     def state_update(self, info, master, conf_bit):
         if self.state == 0:                                 # Si esta en estado de inicialización
@@ -55,8 +64,9 @@ class Tag:
                 self.post_info()
 
         elif (self.state == 1) and (conf_bit == str(1)):    # Confirmación con bit de confirmación 1
-            sys.exit("Tag: " + self.tag_num + " probablemente tenga el botón hundido")
+            # raise Exception("Tag: " + self.tag_num + " probablemente tenga el botón hundido")
+            print("Tag: " + self.tag_num + " probablemente tenga el botón hundido")
+            # Se debería parar el código o printear y seguir funcionando?
 
-
-    def post_info(self):                                    # Función para devolver al servidor
+    def post_info(self):    # Función para devolver al servidor
         print("Tag: ", self.tag_num, " envía el numero: ", self.value)
