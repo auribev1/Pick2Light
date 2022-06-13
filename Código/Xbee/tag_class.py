@@ -21,6 +21,7 @@ class Tag:
             try:
                 if self.state == 0:
                     master.send_data(self.xbee, self.init + self.tag_num)  # manda 000 para establecer conexión
+                    count += 1
                 else:
                     return None
             except:
@@ -42,6 +43,7 @@ class Tag:
             try:
                 if self.state == 1:
                     master.send_data(self.xbee, str(data) + self.tag_num)
+                    #count += 1
                     #master.send_data_async(self.xbee, str(data) + self.tag_num)
                 else:
                     return True
@@ -81,13 +83,19 @@ class TrafficLight:
     def __init__(self, master, base, mac, rack):
         self.xbee = RemoteXBeeDevice(master, XBee64BitAddress.from_hex_string(base+str(mac))) # inicializa el xbee
         self.rack = rack
-        self.state = self.red
+        self.state = self.green
+        self.state_init(master)
+
+    def state_init(self, master):
+        master.send_data(self.xbee, "000" + str(self.green) + "000")
 
     def state_update(self, info, master):
         if self.state == self.red and info == self.green:
             master.send_data(self.xbee, "000" + str(self.green) + "000")
+            #master.send_data_async(self.xbee, "000" + str(self.green) + "000")
             self.state = self.green
         elif self.state == self.green and info == self.red:
             master.send_data(self.xbee, "000" + str(self.red) + "000")
+            #master.send_data_async(self.xbee, "000" + str(self.red) + "000")
             self.state = self.red
 
