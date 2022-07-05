@@ -19,9 +19,10 @@ def my_data_received_callback1(xbee_message):
         db.loc[(db.tag_num == tag_num) & (base + db.mac == address)].objects.apply(
             lambda x: x.state_update(info, master1, conf_bit))
 
+        post = db.loc[(db.rack == rack)]
         tf_info = 1 if 2 in [i.state for i in db.loc[(db.rack == rack)].objects] else 0
         traffic_lights.loc[(traffic_lights.traffic_light == rack)].objects.apply(
-            lambda x: x.state_update(tf_info, master1)) #descomentar luego
+            lambda x: x.state_update(tf_info, master1, post))
 
 
 
@@ -39,9 +40,10 @@ def my_data_received_callback2(xbee_message):
         db.loc[(db.tag_num == tag_num) & (base + db.mac == address)].objects.apply(
             lambda x: x.state_update(info, master2, conf_bit))
 
+        post = db.loc[(db.rack == rack)]
         tf_info = 1 if 2 in [i.state for i in db.loc[(db.rack == rack)].objects] else 0
         traffic_lights.loc[(traffic_lights.traffic_light == rack)].objects.apply(
-            lambda x: x.state_update(tf_info, master2))
+            lambda x: x.state_update(tf_info, master2, post))
 
 
 #db = pd.read_csv("tags_info.csv", dtype=object, sep=";")
@@ -70,12 +72,13 @@ if any(isinstance(i, str) for i in error_log):
 
 
 while True:
-    json = jsongen(1, 137)
-    if int(db.loc[db.tag_num == json["num"]].rack) != 4:
-        db.loc[db.tag_num == json["num"]].objects.apply(lambda x: x.send_data(master1, json["info"]))
-    else:
-        db.loc[db.tag_num == json["num"]].objects.apply(lambda x: x.send_data(master2, json["info"]))
-    time.sleep(2)
+    json = jsongen(1, 137, 10)
+    for item in json.items():
+        if int(db.loc[db.tag_num == item[0]].rack) != 4:
+            db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master1, item[1]))
+        else:
+            db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master2, item[1]))
+    time.sleep(60)
 
 
 # Pruebas
