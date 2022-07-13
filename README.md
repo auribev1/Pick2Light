@@ -46,8 +46,17 @@ Esta función sirve para inicializar el tag. El hace un conteo de 3 iteraciones 
 
 Esta función se utiliza cuando el tag tiene un valor almacenado y confirma su valor presionando el boton. Esta función utiliza el coordinador para enviar al tag el mensaje "confirm" mencionado anteriormente. Luego el tag vuelve a estar en estado operativo 1 (inicializado confirmado a la espera de mensajes)
 
-### send data
+#### send_data
+<img width="683" alt="image" src="https://user-images.githubusercontent.com/26825857/178823499-8904dc95-622b-4002-b59e-7add778c798f.png">
 
-<img width="679" alt="image" src="https://user-images.githubusercontent.com/26825857/178821896-341cce37-d768-44b6-a696-b12ed2caf25a.png">
+Esta función sirve para enviar información a los tags (información diferente de la confirmación e inicialización, es decir, numeros de pedidos). Inicialmente el tag cambia a estado operativo 1 (inicializado confirmado a la espera de información). Luego se ejecuta el mismo proceso de state_init, itera tres veces y en cada iteración intenta mandar el valor especificado en la función con ayuda del coordinador, en caso de fallar itera otra vez hasta que se supere el numero de intentos, en caso de que no se logre establecer comunicación, se levanta una exepción con el error del tag que se debe revisar. Si se establece comunicación, se espera que el tag cambie de estado y salga de la función.
 
+#### state_update
+Esta función es la más importante ya que maneja la transición entre estados operativos de un tag.
+<img width="658" alt="image" src="https://user-images.githubusercontent.com/26825857/178826462-38e19442-4348-4ff8-920e-31ec7499260e.png">
+Esta función se ejecuta cada vez que le llega un mensaje de un tag al coordinador. A continuación se explica que acciones ejecuta:
+
+* Si el tag se encuentra en estado 0 (inicializado pero sin confirmar) y el mensaje corresponde al de "init" cambia a estado 1 (inicializado confirmado a la espera de información)
+* Si el tag se encuentra en estado 1, el bit del mensaje no es de confirmación y el mensaje son numeros (de cuatro digitos) diferentes al de init y confirm (osea entre 0001 y 9998) se actualiza el estado a 2 (tag visualizando información)
+* 
 
