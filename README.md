@@ -10,26 +10,44 @@ https://hub.digi.com/support/products/xctu/
 Luego se puede comenzar a utilizar el protocolo serial. El serial tanto de UART (Pc) y del Arduino tienen un Buffer mayor a 64 Bytes y puede ser configurable.
 La trama de mensajes a enviar tiene actualmente 24 Bytes de información, se debe configurar igualmente una función asincrona que vaya limpiando el buffer para que no se pierda información.
 
-# Liberias
-Se utiliza la libreria digi-xbee que permite configurar dispositivos xbee y hacer procedimientos de envío y recepción tanto sincronos como asincronos.
+Como premisa, es necesario utilizar la librería de digi-xbee de python, cualquier duda remitirse a https://xbplib.readthedocs.io/en/latest/getting_started_with_xbee_python_library.html
+A continuación, se mencionará las particularidades del código
 
-![image](https://user-images.githubusercontent.com/26825857/159137987-960b7cd8-227f-4801-98d5-3c7496b419e4.png)
+# Código
+La comunicación entre tags y maestros se basa en tres archivos que estan en el repositorio. Estos archivos son: com_tags, tag_class y functions. A continuación se van a detallar
 
-# Pruebas
-![image](https://user-images.githubusercontent.com/26825857/159138019-b44932cb-afd8-4037-a275-cf3338cf9c77.png)
+## tag_class
+Este archivo contiene las clases que se utilizan para representar los elementos involucrados en la comunicación. Basicamente, el proceso consiste en la interacción de dos clases, los tags de los modulos (Tag) y los semaforos (TrafficLight).
 
-En el código de prueba se puede ver como se define la MAC a la que se va a envír con comabdo de xbee remoto. Con la función send_data se envía la información a la instancia de xbee receptor configurada.
+### Tag
 
-# Código actual
-Se creo una clase tag_class que hereda las caracteristicas de la clase xbee pero tiene unas funciones especificas y atributos. En este se tiene en cuenta el valor almacenado (para enviar al servidor), numero de tag, estado en el que se encuentra.
+Esta clase que hereda las caracteristicas de la clase xbee pero tiene unas funciones especificas y atributos. Este se puede observar en la siguiente figura:
 
-Para el caso de las funciones se tiene:
-  State_init: que cuando se crea el xbee se actualiza el estado por medio de su ejecución que envpiia 0000 a el receptor para establecer conexión
-  
-  state_confirm: cuando el estado del xbee es 2 y llega un numero confirmatorio entonces esta se ejectuta para enviar 9999 al xbee, y retornar al estado 1
-  
-  send_data: mientras el xbee no haya sido inicializado correctamente lo hace, si es estado 1 o 2 vuelve a estado 1 y envía la información para actualizar en el display con el nuevo valor
-  state_update: dependiendo de la información actualiza el estado. 
-    Si el estado es cero y la confirmación del xbee corresponde a la iniciación entonces cambia a estado 1 (que corresponde a inicializado). 
-    Si el estado es 1 y el mensaje esta entre 0000 y 9999 entonces significa que el xbee recibio el mensaje que se le envío con la funcion de enviar datos y cambia a estado 2(estado de información alumbrandose).
-    Cuando el estado es 2 y el mensaje esta entre estos mismos intervalos entonces se almacena el valor en la clase y se procede a ejecutar state-confirm para enviar 9999 y resetear el estado a 1.
+<img width="580" alt="image" src="https://user-images.githubusercontent.com/26825857/178814007-73c36c4c-d2af-4869-a2dd-0d8824276694.png">
+
+Cada Tag tiene como atributos los códigos de init (0000) y confirm (9999). Estos basicamente son los comandos que se transmiten a un tag para inicializarlos y confirmar un pedido especificamente. Estos sserviran durante el funcionamiento para simplificar el código.
+
+En la imagen se puede ver el constructor representado por "__init__" que, cuando se crea una clase de este tipo, se crean unas caracteristicas definidas, estas se listan a continuación.
+
+* Como se menciono anteriormente, una de las caracteristicas del Tag es que es un xbee, este xbee se inicializa con RemoteXBeeDevice de la librería mencionada anteriormente. A este se le debe especificar el coordinador,  al que se le debe especificar cual es el coordinador y se le debe pasar que tipo de Xbee ser, para este caso se utiliza un XBee64BitAddress. A este xbee se le debe pasar la MAC con el que se va a crear, en el código, cuando se crea la clase se especifica la MAC dividida en la parte especifica (con el nombre mac) y la parte general para todos los xbee (llamada base).
+* tag_num es el parametro de tres caracteres que identifica al tag del laboratorio y va desde 000 hasta 999, este se especifica al crear la clase
+* value es el valor que va a almacenar. Cuando el desde el servidor llega un valor y el tag se alumbra, luego de confirmar el valor este se almacena en este atributo
+* state es el estado operativo en el que se encuentra. Este se inicializa en 0 que significa que esta inicializado sin confirmar
+
+A continuación se explican los metodos
+
+#### state_init
+<img width="428" alt="image" src="https://user-images.githubusercontent.com/26825857/178817088-6ca2282d-95be-4c30-98a7-ab39840851a6.png">
+
+Esta función sirve para inicializar el tag. El hace un conteo de 3 iteraciones para intentar inicializarlo. Para realizarlo, si el estado sigue estando en 0 (inicializado sin confirmar) utiliza al coordinador para enviarle un mensaje al tag, especificamente el mensaje "init" definido anteriormente. Cuando el estado cambia a 1 (estado de inicializado confirmado) la función acaba. En caso de que no responda el tag, luego de 3 iteraciónes, la función retorna el numero de tag con problema para almacenarlo en una lista de reporte. Entre cada una de las 3 iteraciónes hay una espera de 0.1 segundos.
+
+#### state_confirm
+<img width="371" alt="image" src="https://user-images.githubusercontent.com/26825857/178818971-3633160a-9f88-4920-b597-1374d36497d3.png">
+
+Esta función se utiliza cuando el tag tiene un valor almacenado y confirma su valor presionando el boton. Esta función utiliza el coordinador para enviar al tag el mensaje "confirm" mencionado anteriormente. Luego el tag vuelve a estar en estado operativo 1 (inicializado confirmado a la espera de mensajes)
+
+### send data
+
+<img width="679" alt="image" src="https://user-images.githubusercontent.com/26825857/178821896-341cce37-d768-44b6-a696-b12ed2caf25a.png">
+
+
