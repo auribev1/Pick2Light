@@ -53,12 +53,12 @@ Esta función sirve para enviar información a los tags (información diferente 
 
 #### state_update
 Esta función es la más importante ya que maneja la transición entre estados operativos de un tag.
-<img width="658" alt="image" src="https://user-images.githubusercontent.com/26825857/178826462-38e19442-4348-4ff8-920e-31ec7499260e.png">
+<img width="643" alt="image" src="https://user-images.githubusercontent.com/26825857/179061048-23d5572a-6fa7-4861-995d-f7e1214a7494.png">
 Esta función se ejecuta cada vez que le llega un mensaje de un tag al coordinador. A continuación se explica que acciones ejecuta:
 
 * Si el tag se encuentra en estado 0 (inicializado pero sin confirmar) y el mensaje corresponde al de "init" cambia a estado 1 (inicializado confirmado a la espera de información)
 * Si el tag se encuentra en estado 1, el bit del mensaje no es de confirmación y el mensaje son numeros (de cuatro digitos) diferentes al de init y confirm (osea entre 0001 y 9998) se actualiza el estado a 2 (tag visualizando información)
-* Si el tag se encuentra en estado 2 (visualizando información) y le llega información con un numero y el bit de confirmación en 1 significa que le estan confirmando. El valor que llega, si es diferente a "init" y a "confirm" se almacena como el valor confirmado por el tag y se ejecuta la función "confirm" mencionada anteriormente.
+* Si el tag se encuentra en estado 2 (visualizando información) y le llega información con un numero y el bit de confirmación en 1 significa que le estan confirmando. El valor que llega, si es diferente a "init" y a "confirm" se almacena como el valor confirmado por el tag incluyendo la fecha y hora de confirmación y se ejecuta la función "confirm" mencionada anteriormente.
 * Por ultimo, si el estado es 1 (inicializado confirmado a la espera de información) y el bit de confirmacion es 1 es un estado fallido, probablemente el botón este hundido.
 
 ### TrafficLight
@@ -79,7 +79,6 @@ Esta función es similar a la de la clase Tag y se actualiza cada vez que le lle
 * Si el estado es verde y la información corresponde al color rojo, se envía un mensaje al semaforo para que cambie a color rojo y se actualiza su estado.
 
 ## functions
-
 ### jsongen
 ### post_info
 
