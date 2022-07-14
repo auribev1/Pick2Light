@@ -58,5 +58,36 @@ Esta función se ejecuta cada vez que le llega un mensaje de un tag al coordinad
 
 * Si el tag se encuentra en estado 0 (inicializado pero sin confirmar) y el mensaje corresponde al de "init" cambia a estado 1 (inicializado confirmado a la espera de información)
 * Si el tag se encuentra en estado 1, el bit del mensaje no es de confirmación y el mensaje son numeros (de cuatro digitos) diferentes al de init y confirm (osea entre 0001 y 9998) se actualiza el estado a 2 (tag visualizando información)
-* 
+* Si el tag se encuentra en estado 2 (visualizando información) y le llega información con un numero y el bit de confirmación en 1 significa que le estan confirmando. El valor que llega, si es diferente a "init" y a "confirm" se almacena como el valor confirmado por el tag y se ejecuta la función "confirm" mencionada anteriormente.
+* Por ultimo, si el estado es 1 (inicializado confirmado a la espera de información) y el bit de confirmacion es 1 es un estado fallido, probablemente el botón este hundido.
 
+### TrafficLight
+<img width="575" alt="image" src="https://user-images.githubusercontent.com/26825857/178858250-c83f4664-c056-4142-b209-567f99628645.png">
+
+Basicamente traffic light es otro tipo de xbee que tiene información similar a la clase Tag. Tiene dos atributos que corresponden a Green o Red que representan el mensaje que se debe envíar para cambiar el semaforo a un respectivo color. la clase constructora define el Xbee asociado, el coordinador respectivo con su respectiva MAC como se explico en la clase Tag y se asocia a un modulo que en este caso se llama "rack". Hay un parametro para almacenar en que estado operativo está (puede estar en rojo o verde). Por último, cuando se construye la clase, se ejecuta la función de inicializar.
+
+#### state_init
+<img width="407" alt="image" src="https://user-images.githubusercontent.com/26825857/178858523-e836fcc5-f265-43b1-93aa-0f0b46556152.png">
+
+Esta función envía al semaforo el mensaje para que inicie la operación en color verde (que significa que no hay Tags alumbrando en su respectivo modulo (rack)
+
+#### state_update
+<img width="582" alt="image" src="https://user-images.githubusercontent.com/26825857/178858614-9f0c1ae0-b854-4184-9aad-a84c18c6234a.png">
+
+Esta función es similar a la de la clase Tag y se actualiza cada vez que le llega información a diversos tags en la función "callback" que se ejecuta cada vez que llega un mensaje, esta sigue la siguiente secuencia lógica:
+* Si cuando se llama la función, el estado del semaforo es rojo (hay tagas alumbrando) y la información corresponde al color verde (no hay tags alumbrando), se envía el color verde al semaforo, se actualiza su estado y se hace un POST al servidor de la información (esto sucede cuando todos los tags de un modulo confirman su valor) con la función "post_info". Esta función se explica en la siguiente sección.
+* Si el estado es verde y la información corresponde al color rojo, se envía un mensaje al semaforo para que cambie a color rojo y se actualiza su estado.
+
+## functions
+
+### jsongen
+### post_info
+
+
+## com_tags
+
+### librerias
+### función callback
+### Leer datos e inicializar coordinadores
+### crear clases e inicializarlas
+### ciclo
