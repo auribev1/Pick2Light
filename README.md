@@ -100,7 +100,30 @@ Se importan las librerías del xbee de digi-xbee que dejan crear dospositivos. S
 ### función callback
 <img width="595" alt="image" src="https://user-images.githubusercontent.com/26825857/179242297-ee69d7df-cc4e-4470-b0b5-57d959e841e2.png">
 La función callback es de las más importantes ya que es la función que se ejecuta cada vez que a un coordinador le llega un mensaje. Recibe la información de manera asincrona sin necesidad de parar el código. Una vez un coordinador conectado al computador reciba este mensaje, se ejecuta la función siguiendo los siguientes pasos:
-*El mensaje se almacena como un string y de este string se extrae la dirección MAC. Si la dirección MAC no corresponde 
+*El mensaje se almacena como un string y de este string se extrae la dirección MAC. Si la dirección MAC no corresponde a un semaforo, se evalúa la función (esto se hace porque los semaforos no contestan nada). Si la dirección corresponde a un tag, lo primero que se hace es decodificar el mensaje y extraer cierta información: numero del tag que envía, información que el tag envió y el bit de confirmación que representa si el tag esta hundiendo el boton de confirmación o no.
+*De la dirección MAC del tag que envió la información se extrae el rack o modulo al que pertenece el tag esto se hace para poder filtrar los tags que se encuentran tambien encendidos (util para poder enviar la confirmación)
+*Se utilizan los datos identificados almacenados para ejecutar la función de state_update mencionada anteriormente. Esto permite que dependiendo del mensaje, cada tag cambie su estado
+*Las ultimas lineas identifican si todos los tags de un modulo se encuentran confirmados o no, esto se hace para ejecutar la función state_update del semaforo para que una vez todos los modulos esten listos, este alumbre verde, de caso contrario, si aun hay información visualizandose en algun tag, alumbre verde.
+
+Esta función es la de call back para el primer coordinador. Son dos coordinadores para que puedan manejar todas las peticiones simultaneas sin colapsar el buffer. Se debe entonces definir una función identica que considere el coordinador dos definido como "master2". En el caso anterior, cuando a la función se pasaba información sobre el coordinador encargado de enviar informacion, se utilizaba master1. La imagen de la segunda función call back se muestra a continuación.
+
+<img width="605" alt="image" src="https://user-images.githubusercontent.com/26825857/179312563-0428efbf-f141-47f5-8301-535b321056bb.png">
+
 ### Leer datos e inicializar coordinadores
+<img width="464" alt="image" src="https://user-images.githubusercontent.com/26825857/179312628-60b332e1-ae65-4fe7-9c4d-70fc18e31b88.png">
+
+Lo primero que se hace es leer el archivo de información de tags del laboratorio, esto tiene información relacionada a cada tag, su referencia, la MAC especifica del xbee asociada a este y el rack o modulo al que pertenece. Esta se puede ver a continuación.
+
+<img width="218" alt="image" src="https://user-images.githubusercontent.com/26825857/179313857-0f2b01df-d708-4b06-a1d2-cc9c16807e63.png">
+
+La segunda información que se carga corresponde a los semaforos. Se cuenta para cada semaforo la MAC del xbee asociado y el modulo que representa. Esta se puede ver a continuación.
+
+<img width="166" alt="image" src="https://user-images.githubusercontent.com/26825857/179314154-b50dcb13-085e-42fe-9d23-a3c7811f0600.png">
+
+Luego se inicializan los dos coordinadores, el puerto que se les especifica depende del computador y puede ser consultado en el XCTU cuando se contecta cada uno. Luego de definir cual coordinador va a ser el 1 (controla los modulos A,B y C) y el 2 (controla el modulo D y los semaforos), se abre la conexión y se asocia la función asincrona de call back a cada una (son dos funciones, una diferente para cada coordinador). Por ultimo se define la base que corresponde al tramo de MAC que es comun para todos los xbees, esto se hace para simplificar el mandejo de información.
+
 ### crear clases e inicializarlas
+<img width="845" alt="image" src="https://user-images.githubusercontent.com/26825857/179315007-a4229d0a-e320-4e99-988b-a8282e9325f3.png">
+
+
 ### ciclo
