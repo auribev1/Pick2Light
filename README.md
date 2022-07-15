@@ -79,14 +79,28 @@ Esta función es similar a la de la clase Tag y se actualiza cada vez que le lle
 * Si el estado es verde y la información corresponde al color rojo, se envía un mensaje al semaforo para que cambie a color rojo y se actualiza su estado.
 
 ## functions
-### jsongen
-### post_info
+El archivo functions tiene unas funciones auxiliares que permiten complementar la funcionalidad de la aplicación. Esencialmente consiste en dos funciones que sirven para la prueba y que serán remplazadas una vez se haya comunicación directa con la aplicación del servidor
 
+### jsongen
+<img width="664" alt="image" src="https://user-images.githubusercontent.com/26825857/179238903-48f8b899-0d20-42be-bcef-841df12e37e2.png">
+
+jsongen es una función que se utiliza para simular la consulta de información en el end point del servidor. Dados unos numeros (minimo y máximo) de tags disponibles y un numero de tags por consulta, se genera un diccionario con N referencias, donde aparece un numero aleatorio de tag y un valor asociado. Esta función se cambiara por la consulta al servidor por información nueva de los modulos para alumbrar
+
+### post_info
+<img width="446" alt="image" src="https://user-images.githubusercontent.com/26825857/179239783-4ca4088c-81d0-4178-8948-6002b165d597.png">
+post_info es una función que sirve para simular la respuesta de la aplicación al servidor. Esto ocurre cuando todo un modulo confirma su valor y la aplicación de los xbees va a contestar con todos los valores confirmados para cada uno de los tags. Esta funcion consiste en cargar toda la información de los tags de un modulo y solo seleccionar las que tienen un valor asociado. Crea un diccionario con el numero de tag y su valor asociado, actualiza el modulo con valor vacío indicando que ya se leyo la información y que el modulo vuelve a estar disponible. Este valor se printea en la consola, sin embargo, se va actualizará cuando se deba hacer el post con la información al servidor con un protocolo diferente.
 
 ## com_tags
+com_tags es el main del archivo, el script que va a estar ejecutando todo el funcionamiento y que va a ser el principal. Vamos a comenzar describiendo cada una de las secciones:
 
 ### librerias
+<img width="284" alt="image" src="https://user-images.githubusercontent.com/26825857/179241960-aa384c94-9ea2-45b6-be8f-418a545a5fdc.png">
+Se importan las librerías del xbee de digi-xbee que dejan crear dospositivos. Se importa la librería pandas para poder cargar los dataframes y las asociadas a los otros archivos descritas anteriormente
+
 ### función callback
+<img width="595" alt="image" src="https://user-images.githubusercontent.com/26825857/179242297-ee69d7df-cc4e-4470-b0b5-57d959e841e2.png">
+La función callback es de las más importantes ya que es la función que se ejecuta cada vez que a un coordinador le llega un mensaje. Recibe la información de manera asincrona sin necesidad de parar el código. Una vez un coordinador conectado al computador reciba este mensaje, se ejecuta la función siguiendo los siguientes pasos:
+*El mensaje se almacena como un string y de este string se extrae la dirección MAC. Si la dirección MAC no corresponde 
 ### Leer datos e inicializar coordinadores
 ### crear clases e inicializarlas
 ### ciclo
