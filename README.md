@@ -93,11 +93,11 @@ post_info es una función que sirve para simular la respuesta de la aplicación 
 ## com_tags
 com_tags es el main del archivo, el script que va a estar ejecutando todo el funcionamiento y que va a ser el principal. Vamos a comenzar describiendo cada una de las secciones:
 
-### librerias
+### Librerias
 <img width="284" alt="image" src="https://user-images.githubusercontent.com/26825857/179241960-aa384c94-9ea2-45b6-be8f-418a545a5fdc.png">
 Se importan las librerías del xbee de digi-xbee que dejan crear dospositivos. Se importa la librería pandas para poder cargar los dataframes y las asociadas a los otros archivos descritas anteriormente
 
-### función callback
+### Función callback
 <img width="595" alt="image" src="https://user-images.githubusercontent.com/26825857/179242297-ee69d7df-cc4e-4470-b0b5-57d959e841e2.png">
 La función callback es de las más importantes ya que es la función que se ejecuta cada vez que a un coordinador le llega un mensaje. Recibe la información de manera asincrona sin necesidad de parar el código. Una vez un coordinador conectado al computador reciba este mensaje, se ejecuta la función siguiendo los siguientes pasos:
 *El mensaje se almacena como un string y de este string se extrae la dirección MAC. Si la dirección MAC no corresponde a un semaforo, se evalúa la función (esto se hace porque los semaforos no contestan nada). Si la dirección corresponde a un tag, lo primero que se hace es decodificar el mensaje y extraer cierta información: numero del tag que envía, información que el tag envió y el bit de confirmación que representa si el tag esta hundiendo el boton de confirmación o no.
@@ -120,10 +120,16 @@ La segunda información que se carga corresponde a los semaforos. Se cuenta para
 
 <img width="166" alt="image" src="https://user-images.githubusercontent.com/26825857/179314154-b50dcb13-085e-42fe-9d23-a3c7811f0600.png">
 
-Luego se inicializan los dos coordinadores, el puerto que se les especifica depende del computador y puede ser consultado en el XCTU cuando se contecta cada uno. Luego de definir cual coordinador va a ser el 1 (controla los modulos A,B y C) y el 2 (controla el modulo D y los semaforos), se abre la conexión y se asocia la función asincrona de call back a cada una (son dos funciones, una diferente para cada coordinador). Por ultimo se define la base que corresponde al tramo de MAC que es comun para todos los xbees, esto se hace para simplificar el mandejo de información.
+Luego se inicializan los dos coordinadores, el puerto que se les especifica depende del computador y puede ser consultado en el XCTU cuando se contecta cada uno. Luego de definir cual coordinador va a ser el 1 (controla los modulos A,B y C) y el 2 (controla el modulo D), se abre la conexión y se asocia la función asincrona de call back a cada una (son dos funciones, una diferente para cada coordinador). Por ultimo se define la base que corresponde al tramo de MAC que es comun para todos los xbees, esto se hace para simplificar el mandejo de información.
 
-### crear clases e inicializarlas
+### Crear clases e inicializarlas
 <img width="845" alt="image" src="https://user-images.githubusercontent.com/26825857/179315007-a4229d0a-e320-4e99-988b-a8282e9325f3.png">
 
+Luego de inicializar los coordinadores lo que se hace es que en las dos tablas o dataframes creados, se añade una columna a cada esrtructura que inicialice los tags o semaforos con las clases creadas mencionadas anteriormente (esto ayuda a comunicarse con los xbee teniendo información adicional sobre los estados operativos de cada objeto). A cada inicialización le corresponde un coordinador que gobierna la comunicación. Luego se inicializan los tags del laboratorio con la función state_init y los tags que no respondan se van almacenando en una lista que se llama error_log. Esta lista se muestra si hay alguna referencia en ella para que no se proceda con el código si hay tags malos.
 
-### ciclo
+### Ciclo
+<img width="602" alt="image" src="https://user-images.githubusercontent.com/26825857/179316885-957e5a4d-0a07-4457-9812-b94f0599b174.png">
+
+Por último esta la parte del ciclo que se ejecuta constantemente. En esta parte debe llamarse la función que lea el endpoint del servidor para consultar la información a alumbrar y ejecutar el enviar información con la función send_data para enviar la información respectiva a cada tag.
+
+Provisionalmente mientras se define la forma de enviar los datos, se llama la función jsongen que genera unos diccionarios aleatorios de pedidos y para estos pedidos, ejecuta la función send_data para enviar a cada tag su respectivo valor asignado y luego esperar 60 segundos para una próxima iteración
