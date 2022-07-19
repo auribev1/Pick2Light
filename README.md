@@ -13,6 +13,8 @@ La trama de mensajes a enviar tiene actualmente 24 Bytes de información, se deb
 Como premisa, es necesario utilizar la librería de digi-xbee de python, cualquier duda remitirse a https://xbplib.readthedocs.io/en/latest/getting_started_with_xbee_python_library.html
 A continuación, se mencionará las particularidades del código
 
+Si se quiere ver videos del funcionamiento, remitirse al siguiente link: https://eafit-my.sharepoint.com/:f:/g/personal/auribev1_eafit_edu_co/Eu-vMzbqAvRNkzlmpepgZJsBzMxKYYDdITqIgpvSy-AqTA?e=4jDgrs
+
 # Código
 La comunicación entre tags y maestros se basa en tres archivos que estan en el repositorio. Estos archivos son: com_tags, tag_class y functions. A continuación se van a detallar
 
