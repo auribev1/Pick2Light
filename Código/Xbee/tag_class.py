@@ -2,8 +2,7 @@
 from digi.xbee.devices import RemoteXBeeDevice, XBee64BitAddress
 from functions import post_info
 import time
-import sys
-
+from datetime import datetime
 
 class Tag:
 
@@ -13,7 +12,6 @@ class Tag:
     def __init__(self, master, base, mac, tag_num):
         self.xbee = RemoteXBeeDevice(master, XBee64BitAddress.from_hex_string(base+str(mac))) # inicializa el xbee
         self.tag_num = tag_num      # crea el numero tag como atributo
-        #self.value = ""             # define el valor almacenado
         self.value = None
         self.state = 0
 
@@ -28,11 +26,9 @@ class Tag:
                     return None
             except:
                 count += 1
-                #print("intento " + str(count))
 
             time.sleep(0.1)
         return self.tag_num #Crear lista con todos los tags malos
-        #raise Exception("Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar")
 
     def state_confirm(self, master):
         master.send_data(self.xbee, self.confirm + self.tag_num)  # manda 9999 para finalizar comunicación
@@ -46,12 +42,10 @@ class Tag:
                 if self.state == 1:
                     master.send_data(self.xbee, str(data) + self.tag_num)
                     count += 1
-                    #master.send_data_async(self.xbee, str(data) + self.tag_num)
                 else:
                     return True
             except:
                 count += 1
-                #print("intento: ", count)
 
             time.sleep(0.1)
         raise Exception("Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar")
@@ -67,15 +61,13 @@ class Tag:
 
         elif (self.state == 2) and (conf_bit == str(1)):    # Si el tag ya tiene estado 2 y confirmación con bit de confirmación 1
             if info != self.init and info != self.confirm:  # Y los valores que recibe son entre 0000 y 9999
-                self.value = info                           # almacenar el valor enviado
+                now = datetime.now()
+                date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
+                self.value = info + ", " + date_time        # almacenar el valor enviado
                 self.state_confirm(master)
-                #self.post_info()
 
         elif (self.state == 1) and (conf_bit == str(1)):    # Confirmación con bit de confirmación 1
             print("Tag: " + self.tag_num + " probablemente tenga el botón hundido o el mensaje se repitio")
-
-    #def post_info(self):    # Función para devolver al servidor
-        #print("Tag: ", self.tag_num, " envía el numero: ", self.value)
 
 
 class TrafficLight:
@@ -94,12 +86,10 @@ class TrafficLight:
     def state_update(self, info, master, post):
         if self.state == self.red and info == self.green:
             master.send_data(self.xbee, "000" + str(self.green) + "000")
-            #master.send_data_async(self.xbee, "000" + str(self.green) + "000")
             self.state = self.green
             post_info(post)     # Cuando cambia a verde hace un post con la información confirmada
 
         elif self.state == self.green and info == self.red:
             master.send_data(self.xbee, "000" + str(self.red) + "000")
-            #master.send_data_async(self.xbee, "000" + str(self.red) + "000")
             self.state = self.red
 

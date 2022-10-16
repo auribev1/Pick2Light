@@ -8,9 +8,13 @@ def jsongen(tag_min, tag_max, tags):
 
 
 def post_info(post):
+    import requests
     post = post[post.objects.map(lambda x: x.value is not None)]
     dicts = {}
     for i in post.objects:
         dicts[i.tag_num] = i.value
         i.value = None
+
+    response = requests.post(url="https://pick2lightxbee.dis.eafit.edu.co/admin/picking-module", json=dicts)
+    print(response)
     print(dicts) #Aqui se debe hacer el post al servidor

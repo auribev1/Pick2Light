@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from functions import jsongen
 from pprint import pprint
-import requests
+from flask import Flask, render_template, request, make_response, jsonify
 
 
 def my_data_received_callback1(xbee_message):
@@ -71,21 +71,31 @@ if any(isinstance(i, str) for i in error_log):
     raise Exception("Revisar los siguientes tags: " + "\n".join('%s' % tag for tag in error_log if tag is not None))
 
 
-while True:
-    try:
-        time.sleep(2)
-        response = requests.get("https://pick2lightxbee.dis.eafit.edu.co/agent/ligths", timeout=1)
-        if response.status_code == 200:
-            json = response.json()
-            if json:
-                print(json)
-                for item in json.items():
-                    if int(db.loc[db.tag_num == item[0]].rack) != 4:
-                        db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master1, item[1]))
-                    else:
-                        db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master2, item[1]))
-    except:
-        time.sleep(2)
-        continue
+#Servidor local
+app = Flask(__name__)
+
+@app.route("/module-information/", methods=['POST'])
+def post_form():
+    if request.method == "POST":
+        json = request.get_json()
+        for item in json.items():
+            if int(db.loc[db.tag_num == item[0]].rack) != 4:
+                db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master1, item[1]))
+            else:
+                db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master2, item[1]))
+    return make_response("sucess", 200)
 
 
+# while True:
+#     json = jsongen(1, 137, 10)
+#     print(json)
+#     for item in json.items():
+#         if int(db.loc[db.tag_num == item[0]].rack) != 4:
+#             db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master1, item[1]))
+#         else:
+#             db.loc[db.tag_num == item[0]].objects.apply(lambda x: x.send_data(master2, item[1]))
+#     time.sleep(60)
+
+
+if __name__=="__main__":
+    app.run()
