@@ -14,7 +14,10 @@ def post_info(post):
     for i in post.objects:
         dicts[i.tag_num] = i.value
         i.value = None
-
-    response = requests.post(url="https://pick2lightxbee.dis.eafit.edu.co/admin/picking-module", json=dicts)
+    condition = True
+    while condition:
+        response = requests.post(url="https://pick2lightxbee.dis.eafit.edu.co//admin/picking-module", json=dicts)
+        if response.status_code == 200:
+            condition = False
     print(response)
     print(dicts) #Aqui se debe hacer el post al servidor
