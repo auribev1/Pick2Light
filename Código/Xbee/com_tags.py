@@ -2,8 +2,6 @@ from digi.xbee.devices import XBeeDevice
 from tag_class import Tag, TrafficLight
 import pandas as pd
 import time
-from functions import jsongen
-from pprint import pprint
 import requests
 
 
