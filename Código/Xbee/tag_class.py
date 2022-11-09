@@ -48,7 +48,11 @@ class Tag:
                 count += 1
 
             time.sleep(0.1)
-        raise Exception("Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar")
+
+        print("\n" + "Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar" + "\n")
+        time.sleep(60 * 5)
+        raise Exception("Shut down")
+        #raise Exception("Tag: " + str(self.tag_num) + " no ha respondido, verifique su estado antes de continuar")
 
     def state_update(self, info, master, conf_bit):
         if self.state == 0:                                 # Si esta en estado de inicialización

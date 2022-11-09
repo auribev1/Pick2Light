@@ -66,7 +66,10 @@ traffic_lights["objects"] = [TrafficLight(master1, base, i, j) if int(j) != 4 el
 
 error_log = [db.objects[i].state_init(master1) if int(db.iloc[i].rack) != 4 else db.objects[i].state_init(master2) for i in range(len(db))]
 if any(isinstance(i, str) for i in error_log):
-    raise Exception("Revisar los siguientes tags: " + "\n".join('%s' % tag for tag in error_log if tag is not None))
+    print("\n" + "Revisar los siguientes tags: " + "\n".join('%s' % tag for tag in error_log if tag is not None) + "\n")
+    time.sleep(60*5)
+    raise Exception("Shut down")
+    #raise Exception("Revisar los siguientes tags: " + "\n".join('%s' % tag for tag in error_log if tag is not None))
 
 
 while True:
